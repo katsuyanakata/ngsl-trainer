@@ -8,7 +8,7 @@ export type WordItem = {
   level?: string;
 };
 
-export type Rating = "again" | "good";
+export type Rating = "keep" | "done";
 
 export type LearnProgressEntry = {
   score: number;
@@ -20,4 +20,6 @@ export type LearnProgressEntry = {
 
 export type LearnProgressMap = Record<string, LearnProgressEntry>;
 
-export type RevealState = 0 | 1 | 2;
+export type DoneMap = Record<string, string>;
+
+export type RevealState = 0 | 1 | 2 | 3;

@@ -79,11 +79,14 @@ button {
 .hero-actions {
   display: flex;
   justify-content: center;
-  margin-bottom: 20px;
+  margin-bottom: 34px;
 }
 
 .hero-links {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 
 .outline-button {
@@ -111,7 +114,9 @@ button {
 .close-button:focus-visible,
 .learn-header-link:focus-visible,
 .learn-header-button:focus-visible,
-.word-card-content:focus-visible {
+.word-card-content:focus-visible,
+.done-back:focus-visible,
+.done-select:focus-visible {
   outline: 2px solid #000;
   outline-offset: 2px;
 }
@@ -125,7 +130,12 @@ button {
   font-weight: 700;
   font-size: 1rem;
   cursor: pointer;
+  text-decoration: none;
   text-underline-offset: 4px;
+}
+
+.inline-link:hover {
+  opacity: 0.72;
 }
 
 .modal-backdrop {
@@ -203,7 +213,7 @@ button {
   padding-bottom: max(14px, env(safe-area-inset-bottom));
   padding-left: max(14px, env(safe-area-inset-left));
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr;
   gap: 10px;
   overflow: hidden;
 }
@@ -299,21 +309,29 @@ button {
 
 .swipe-cue {
   position: absolute;
-  top: 14px;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: #9d9d9d;
+  top: 16px;
+  z-index: 2;
+  padding: 7px 10px 6px;
+  border: 2px solid currentColor;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  font-size: clamp(1rem, 4.6vw, 1.7rem);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  line-height: 1;
   pointer-events: none;
   user-select: none;
+  text-transform: uppercase;
 }
 
 .swipe-cue-left {
   left: 16px;
+  color: #6d7f95;
 }
 
 .swipe-cue-right {
   right: 16px;
+  color: #2b9b53;
 }
 
 .word-card-content {
@@ -330,10 +348,6 @@ button {
   gap: 20px;
   text-align: center;
   cursor: pointer;
-}
-
-.word-card-content:disabled {
-  cursor: not-allowed;
 }
 
 .word-card-lemma {
@@ -365,6 +379,13 @@ button {
   text-overflow: ellipsis;
 }
 
+.word-card-label {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+}
+
 .word-card-pos {
   color: var(--muted);
   font-size: 0.76rem;
@@ -391,15 +412,127 @@ button {
   color: var(--muted);
 }
 
-.learn-swipe-hint {
+.learn-once-hint {
   margin: 0;
-  min-height: 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   color: #9a9a9a;
+  text-align: center;
   font-size: 0.68rem;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
+}
+
+.done-shell {
+  width: min(100%, 560px);
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding-top: max(12px, env(safe-area-inset-top));
+  padding-right: max(14px, env(safe-area-inset-right));
+  padding-bottom: max(14px, env(safe-area-inset-bottom));
+  padding-left: max(14px, env(safe-area-inset-left));
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 12px;
+}
+
+.done-header {
+  display: grid;
+  gap: 6px;
+}
+
+.done-back {
+  justify-self: start;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.82rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  cursor: pointer;
+}
+
+.done-header h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 8vw, 2rem);
+  letter-spacing: -0.02em;
+}
+
+.done-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.done-toolbar label {
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.done-select {
+  border: 1px solid #111;
+  border-radius: 8px;
+  min-height: 34px;
+  padding: 4px 10px;
+  background: #fff;
+  color: #111;
+}
+
+.done-list-wrap {
+  min-height: 0;
+  overflow-y: auto;
+  border: 1px solid #111;
+  border-radius: 12px;
+}
+
+.done-empty {
+  margin: 0;
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.done-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.done-item {
+  padding: 14px;
+  border-bottom: 1px solid #e5e5e5;
+  display: grid;
+  gap: 6px;
+}
+
+.done-item:last-child {
+  border-bottom: 0;
+}
+
+.done-word {
+  margin: 0;
+  font-size: 1.12rem;
+  font-weight: 700;
+}
+
+.done-row {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.94rem;
+  line-height: 1.5;
+}
+
+.done-label {
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+}
+
+.done-definition {
+  display: block;
 }
 
 @keyframes reveal-up {

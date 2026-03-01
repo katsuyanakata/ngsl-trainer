@@ -2,17 +2,22 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  applyRating,
+  applyKeep,
   buildSessionQueue,
+  loadDoneMap,
   loadProgress,
+  markDone,
+  restoreDoneState,
+  saveDoneMap,
   saveProgress,
   UndoAction,
   undoLastAction
 } from "@/lib/progress-store";
-import { LearnProgressMap, Rating, RevealState, WordItem } from "@/lib/types";
+import { DoneMap, LearnProgressMap, RevealState, WordItem } from "@/lib/types";
 
 export function useStudySession(words: WordItem[]) {
   const [progress, setProgress] = useState<LearnProgressMap>({});
+  const [doneMap, setDoneMap] = useState<DoneMap>({});
   const [queue, setQueue] = useState<string[]>([]);
   const [queueIndex, setQueueIndex] = useState(0);
   const [reveal, setReveal] = useState<RevealState>(0);
@@ -20,6 +25,7 @@ export function useStudySession(words: WordItem[]) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   const progressRef = useRef<LearnProgressMap>({});
+  const doneMapRef = useRef<DoneMap>({});
 
   const wordsById = useMemo(() => new Map(words.map((word) => [word.id, word])), [words]);
   const currentWordId = queue[queueIndex];
@@ -27,14 +33,19 @@ export function useStudySession(words: WordItem[]) {
 
   const total = queue.length;
   const done = Math.min(queueIndex, total);
-  const isFinished = isLoaded && total > 0 && queueIndex >= total;
+  const isFinished = isLoaded && queueIndex >= total;
 
   useEffect(() => {
     const loadedProgress = loadProgress();
-    progressRef.current = loadedProgress;
-    setProgress(loadedProgress);
+    const loadedDoneMap = loadDoneMap();
 
-    const initialQueue = buildSessionQueue(words, loadedProgress);
+    progressRef.current = loadedProgress;
+    doneMapRef.current = loadedDoneMap;
+
+    setProgress(loadedProgress);
+    setDoneMap(loadedDoneMap);
+
+    const initialQueue = buildSessionQueue(words, loadedProgress, loadedDoneMap);
     setQueue(initialQueue);
     setQueueIndex(0);
     setReveal(0);
@@ -47,22 +58,34 @@ export function useStudySession(words: WordItem[]) {
   }, [currentWordId]);
 
   const toggleReveal = useCallback(() => {
-    setReveal((state) => ((state + 1) % 3) as RevealState);
+    setReveal((state) => (state < 3 ? ((state + 1) as RevealState) : 3));
   }, []);
 
   const rateCurrent = useCallback(
-    (rating: Rating) => {
+    (actionType: "keep" | "done") => {
       if (!currentWordId || queueIndex >= total) return;
 
-      const { nextProgress, prevProgress } = applyRating(progressRef.current, currentWordId, rating);
-      progressRef.current = nextProgress;
-      setProgress(nextProgress);
-      saveProgress(nextProgress);
+      const prevProgress = progressRef.current[currentWordId] ?? null;
+      const prevDoneAt = doneMapRef.current[currentWordId] ?? null;
+
+      if (actionType === "keep") {
+        const { nextProgress } = applyKeep(progressRef.current, currentWordId);
+        progressRef.current = nextProgress;
+        setProgress(nextProgress);
+        saveProgress(nextProgress);
+      } else {
+        const nextDoneMap = markDone(doneMapRef.current, currentWordId);
+        doneMapRef.current = nextDoneMap;
+        setDoneMap(nextDoneMap);
+        saveDoneMap(nextDoneMap);
+      }
 
       setLastAction({
         wordId: currentWordId,
         prevProgress,
-        prevQueueIndex: queueIndex
+        prevDoneAt,
+        prevQueueIndex: queueIndex,
+        actionType
       });
 
       setQueueIndex((index) => Math.min(index + 1, total));
@@ -74,22 +97,31 @@ export function useStudySession(words: WordItem[]) {
   const undo = useCallback(() => {
     if (!lastAction) return;
 
-    const restored = undoLastAction(progressRef.current, lastAction);
-    progressRef.current = restored;
-    setProgress(restored);
-    saveProgress(restored);
+    if (lastAction.actionType === "keep") {
+      const restoredProgress = undoLastAction(progressRef.current, lastAction);
+      progressRef.current = restoredProgress;
+      setProgress(restoredProgress);
+      saveProgress(restoredProgress);
+    }
+
+    if (lastAction.actionType === "done") {
+      const restoredDoneMap = restoreDoneState(doneMapRef.current, lastAction);
+      doneMapRef.current = restoredDoneMap;
+      setDoneMap(restoredDoneMap);
+      saveDoneMap(restoredDoneMap);
+    }
 
     setQueueIndex(lastAction.prevQueueIndex);
     setReveal(0);
     setLastAction(null);
   }, [lastAction]);
 
-  const rateAgain = useCallback(() => {
-    rateCurrent("again");
+  const rateKeep = useCallback(() => {
+    rateCurrent("keep");
   }, [rateCurrent]);
 
-  const rateGood = useCallback(() => {
-    rateCurrent("good");
+  const rateDone = useCallback(() => {
+    rateCurrent("done");
   }, [rateCurrent]);
 
   return {
@@ -99,12 +131,13 @@ export function useStudySession(words: WordItem[]) {
     reveal,
     toggleReveal,
     progress,
+    doneMap,
     progressStatus: {
       done,
       total
     },
-    rateAgain,
-    rateGood,
+    rateKeep,
+    rateDone,
     canUndo: Boolean(lastAction),
     undo
   };

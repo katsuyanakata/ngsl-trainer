@@ -171,21 +171,21 @@ export function SwipeCard({ onSwipeLeft, onSwipeRight, disabled = false, childre
     resetDrag();
   }
 
-  const cueOpacity = Math.min(1, Math.abs(dx) / Math.max(threshold, 1));
-
   const transform = animatingOut
     ? animatingOut === "left"
       ? "translate3d(-120%, 0, 0) rotate(-7deg)"
       : "translate3d(120%, 0, 0) rotate(7deg)"
     : `translate3d(${dx}px, 0, 0) rotate(${dx * 0.05}deg)`;
 
+  const cueOpacity = Math.min(1, Math.abs(dx) / Math.max(threshold, 1));
+
   return (
     <div className="swipe-card-wrap">
       <span className="swipe-cue swipe-cue-left" style={{ opacity: dx < 0 ? cueOpacity : 0 }} aria-hidden="true">
-        AGAIN
+        KEEP
       </span>
       <span className="swipe-cue swipe-cue-right" style={{ opacity: dx > 0 ? cueOpacity : 0 }} aria-hidden="true">
-        GOOD
+        DONE
       </span>
 
       <div

@@ -24,6 +24,9 @@ export default function HomePage() {
                 </Link>
               </div>
               <div className="hero-links">
+                <Link href="/done" className="inline-link" aria-label="Open done words list">
+                  Done一覧
+                </Link>
                 <button
                   type="button"
                   className="inline-link"
