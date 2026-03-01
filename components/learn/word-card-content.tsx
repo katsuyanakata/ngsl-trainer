@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { RevealState, WordItem } from "@/lib/types";
 
 type WordCardContentProps = {
@@ -9,6 +10,33 @@ type WordCardContentProps = {
 
 export function WordCardContent({ word, reveal, onToggleReveal, disabled = false }: WordCardContentProps) {
   const canReveal = !disabled && reveal < 3;
+  const [showSwipeNudge, setShowSwipeNudge] = useState(false);
+  const nudgeTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (reveal >= 3) return;
+    setShowSwipeNudge(false);
+  }, [reveal]);
+
+  useEffect(() => {
+    return () => {
+      if (nudgeTimerRef.current === null) return;
+      window.clearTimeout(nudgeTimerRef.current);
+    };
+  }, []);
+
+  function triggerSwipeNudge() {
+    setShowSwipeNudge(true);
+
+    if (nudgeTimerRef.current !== null) {
+      window.clearTimeout(nudgeTimerRef.current);
+    }
+
+    nudgeTimerRef.current = window.setTimeout(() => {
+      setShowSwipeNudge(false);
+      nudgeTimerRef.current = null;
+    }, 900);
+  }
 
   return (
     <div
@@ -16,14 +44,27 @@ export function WordCardContent({ word, reveal, onToggleReveal, disabled = false
       tabIndex={disabled ? -1 : 0}
       className="word-card-content"
       onClick={() => {
-        if (!canReveal) return;
-        onToggleReveal();
+        if (canReveal) {
+          onToggleReveal();
+          return;
+        }
+
+        if (reveal >= 3) {
+          triggerSwipeNudge();
+        }
       }}
       onKeyDown={(event) => {
-        if (!canReveal) return;
         if (event.key !== "Enter" && event.key !== " ") return;
         event.preventDefault();
-        onToggleReveal();
+
+        if (canReveal) {
+          onToggleReveal();
+          return;
+        }
+
+        if (reveal >= 3) {
+          triggerSwipeNudge();
+        }
       }}
       aria-label="Toggle card details"
       aria-disabled={disabled}
@@ -49,6 +90,11 @@ export function WordCardContent({ word, reveal, onToggleReveal, disabled = false
           <>
             <p className="word-card-label">例文</p>
             <p className="word-card-example">{word.example_en}</p>
+            {showSwipeNudge ? (
+              <p className="word-swipe-nudge" aria-hidden="true">
+                <span> ←  SWIPE  →</span>
+              </p>
+            ) : null}
           </>
         ) : null}
       </div>

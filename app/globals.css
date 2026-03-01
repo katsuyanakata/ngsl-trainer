@@ -309,13 +309,13 @@ button {
 
 .swipe-cue {
   position: absolute;
-  top: 16px;
+  top: 50%;
   z-index: 2;
-  padding: 7px 10px 6px;
+  padding: 10px 14px 9px;
   border: 2px solid currentColor;
-  border-radius: 8px;
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.92);
-  font-size: clamp(1rem, 4.6vw, 1.7rem);
+  font-size: clamp(2rem, 12vw, 4rem);
   font-weight: 800;
   letter-spacing: 0.12em;
   line-height: 1;
@@ -324,14 +324,17 @@ button {
   text-transform: uppercase;
 }
 
-.swipe-cue-left {
-  left: 16px;
-  color: #6d7f95;
+.swipe-cue-center {
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
-.swipe-cue-right {
-  right: 16px;
+.swipe-cue.is-keep {
   color: #2b9b53;
+}
+
+.swipe-cue.is-done {
+  color: #e53935;
 }
 
 .word-card-content {
@@ -396,6 +399,18 @@ button {
 .word-card-definition,
 .word-card-example {
   font-size: 0.98rem;
+}
+
+.word-swipe-nudge {
+  margin: 6px 0 0;
+  color: #b5b5b5;
+  font-size: 0.72rem;
+  letter-spacing: 0.07em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  animation: nudge-fade 900ms ease-out both;
 }
 
 .learn-placeholder-card {
@@ -543,6 +558,21 @@ button {
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+@keyframes nudge-fade {
+  from {
+    opacity: 0.2;
+    transform: translateY(2px);
+  }
+  25% {
+    opacity: 0.85;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0.2;
+    transform: translateY(0);
   }
 }
 
