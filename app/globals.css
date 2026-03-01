@@ -410,7 +410,7 @@ button {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  animation: nudge-fade 900ms ease-out both;
+  animation: nudge-fade 900ms linear both;
 }
 
 .learn-placeholder-card {

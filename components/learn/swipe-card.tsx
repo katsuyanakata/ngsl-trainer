@@ -99,7 +99,9 @@ export function SwipeCard({ onSwipeLeft, onSwipeRight, disabled = false, childre
     };
 
     blockClickRef.current = false;
-    event.currentTarget.setPointerCapture(event.pointerId);
+    if (event.pointerType !== "mouse") {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
   }
 
   function handlePointerMove(event: React.PointerEvent<HTMLDivElement>) {
