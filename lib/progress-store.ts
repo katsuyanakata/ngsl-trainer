@@ -1,0 +1,195 @@
+import { LearnProgressEntry, LearnProgressMap, Rating, WordItem } from "@/lib/types";
+
+export const LEARN_STORAGE_KEY = "ngsl_learn_progress_v1";
+
+const GOOD_INTERVAL_HOURS = [6, 12, 24, 72, 168, 336];
+
+export type UndoAction = {
+  wordId: string;
+  prevProgress: LearnProgressEntry | null;
+  prevQueueIndex: number;
+};
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+function toDate(value: string | undefined): Date | null {
+  if (!value) return null;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return parsed;
+}
+
+function addHours(base: Date, hours: number): string {
+  const copy = new Date(base);
+  copy.setHours(copy.getHours() + hours);
+  return copy.toISOString();
+}
+
+function addMinutes(base: Date, minutes: number): string {
+  const copy = new Date(base);
+  copy.setMinutes(copy.getMinutes() + minutes);
+  return copy.toISOString();
+}
+
+function isObjectLike(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function coerceRating(value: unknown): Rating {
+  if (value === "again" || value === "good") return value;
+  if (value === "dontKnow") return "again";
+  return "good";
+}
+
+function coerceEntry(value: unknown): LearnProgressEntry | null {
+  if (!isObjectLike(value)) return null;
+
+  const score = typeof value.score === "number" ? clamp(value.score, 0, GOOD_INTERVAL_HOURS.length - 1) : 0;
+  const seenCount = typeof value.seenCount === "number" ? Math.max(0, value.seenCount) : 0;
+  const lastReviewedAt = typeof value.lastReviewedAt === "string" ? value.lastReviewedAt : new Date(0).toISOString();
+
+  const nextDueSource = typeof value.nextDueAt === "string" ? value.nextDueAt : undefined;
+  const nextDueAt = toDate(nextDueSource)?.toISOString() ?? new Date(0).toISOString();
+
+  return {
+    score,
+    seenCount,
+    lastRating: coerceRating(value.lastRating ?? value.lastConfidence),
+    lastReviewedAt,
+    nextDueAt
+  };
+}
+
+function shuffleIds(ids: string[]): string[] {
+  const copy = ids.slice();
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+export function loadProgress(): LearnProgressMap {
+  if (typeof window === "undefined") return {};
+
+  const raw = window.localStorage.getItem(LEARN_STORAGE_KEY);
+  if (!raw) return {};
+
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+
+    if (isObjectLike(parsed) && isObjectLike(parsed.progress)) {
+      const migrated: LearnProgressMap = {};
+      for (const [wordId, entry] of Object.entries(parsed.progress)) {
+        const normalized = coerceEntry(entry);
+        if (normalized) migrated[wordId] = normalized;
+      }
+      return migrated;
+    }
+
+    if (isObjectLike(parsed)) {
+      const normalizedMap: LearnProgressMap = {};
+      for (const [wordId, entry] of Object.entries(parsed)) {
+        const normalized = coerceEntry(entry);
+        if (normalized) normalizedMap[wordId] = normalized;
+      }
+      return normalizedMap;
+    }
+
+    return {};
+  } catch {
+    return {};
+  }
+}
+
+export function saveProgress(progress: LearnProgressMap): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(LEARN_STORAGE_KEY, JSON.stringify({ progress }));
+}
+
+export function applyRating(
+  progress: LearnProgressMap,
+  wordId: string,
+  rating: Rating,
+  now: Date = new Date()
+): { nextProgress: LearnProgressMap; prevProgress: LearnProgressEntry | null } {
+  const current = progress[wordId];
+
+  const nextScore =
+    rating === "good"
+      ? clamp((current?.score ?? 0) + 1, 0, GOOD_INTERVAL_HOURS.length - 1)
+      : 0;
+
+  const nextDueAt =
+    rating === "again"
+      ? addMinutes(now, 20)
+      : addHours(now, GOOD_INTERVAL_HOURS[nextScore] ?? 24);
+
+  const nextEntry: LearnProgressEntry = {
+    score: nextScore,
+    seenCount: (current?.seenCount ?? 0) + 1,
+    lastRating: rating,
+    lastReviewedAt: now.toISOString(),
+    nextDueAt
+  };
+
+  return {
+    nextProgress: {
+      ...progress,
+      [wordId]: nextEntry
+    },
+    prevProgress: current ? { ...current } : null
+  };
+}
+
+export function undoLastAction(progress: LearnProgressMap, action: UndoAction): LearnProgressMap {
+  const next = { ...progress };
+
+  if (!action.prevProgress) {
+    delete next[action.wordId];
+    return next;
+  }
+
+  next[action.wordId] = action.prevProgress;
+  return next;
+}
+
+export function buildSessionQueue(words: WordItem[], progress: LearnProgressMap, now: Date = new Date()): string[] {
+  if (!words.length) return [];
+
+  const dueWords: Array<{ wordId: string; dueAt: number }> = [];
+  const unseenIds: string[] = [];
+
+  for (const word of words) {
+    const entry = progress[word.id];
+    if (!entry) {
+      unseenIds.push(word.id);
+      continue;
+    }
+
+    const dueAt = toDate(entry.nextDueAt);
+    if (!dueAt || dueAt <= now) {
+      dueWords.push({
+        wordId: word.id,
+        dueAt: dueAt?.getTime() ?? Number.NEGATIVE_INFINITY
+      });
+    }
+  }
+
+  const dueIds = dueWords.sort((a, b) => a.dueAt - b.dueAt).map((item) => item.wordId);
+  const randomUnseen = shuffleIds(unseenIds);
+  const queue = [...dueIds, ...randomUnseen];
+
+  if (queue.length) return queue;
+
+  const fallback = words
+    .map((word) => ({
+      wordId: word.id,
+      nextDueAt: toDate(progress[word.id]?.nextDueAt)?.getTime() ?? Number.POSITIVE_INFINITY
+    }))
+    .sort((a, b) => a.nextDueAt - b.nextDueAt)[0];
+
+  return fallback ? [fallback.wordId] : [words[Math.floor(Math.random() * words.length)].id];
+}

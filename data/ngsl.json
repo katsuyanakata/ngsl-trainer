@@ -1,0 +1,182 @@
+[
+  {
+    "id": "ability_n_0001",
+    "lemma": "ability",
+    "rank": 1,
+    "pos": ["noun"],
+    "definition_en": "the power or skill to do something",
+    "example_en": "She has the ability to learn quickly.",
+    "level": "A2"
+  },
+  {
+    "id": "accept_v_0002",
+    "lemma": "accept",
+    "rank": 2,
+    "pos": ["verb"],
+    "definition_en": "to agree to take or receive something",
+    "example_en": "He accepted the invitation immediately.",
+    "level": "A2"
+  },
+  {
+    "id": "access_n_0003",
+    "lemma": "access",
+    "rank": 3,
+    "pos": ["noun", "verb"],
+    "definition_en": "a way of entering or using something",
+    "example_en": "Students have free access to the library.",
+    "level": "B1"
+  },
+  {
+    "id": "achieve_v_0004",
+    "lemma": "achieve",
+    "rank": 4,
+    "pos": ["verb"],
+    "definition_en": "to succeed in doing or reaching something",
+    "example_en": "They achieved their goal ahead of schedule.",
+    "level": "B1"
+  },
+  {
+    "id": "across_prep_0005",
+    "lemma": "across",
+    "rank": 5,
+    "pos": ["preposition", "adverb"],
+    "definition_en": "from one side to the other side",
+    "example_en": "She walked across the street.",
+    "level": "A1"
+  },
+  {
+    "id": "action_n_0006",
+    "lemma": "action",
+    "rank": 6,
+    "pos": ["noun"],
+    "definition_en": "something that you do",
+    "example_en": "Quick action prevented a serious problem.",
+    "level": "A2"
+  },
+  {
+    "id": "active_adj_0007",
+    "lemma": "active",
+    "rank": 7,
+    "pos": ["adjective"],
+    "definition_en": "doing many things; busy and energetic",
+    "example_en": "She stays active by swimming every day.",
+    "level": "A2"
+  },
+  {
+    "id": "activity_n_0008",
+    "lemma": "activity",
+    "rank": 8,
+    "pos": ["noun"],
+    "definition_en": "something that people do for work or enjoyment",
+    "example_en": "Reading is a relaxing activity for him.",
+    "level": "A2"
+  },
+  {
+    "id": "actually_adv_0009",
+    "lemma": "actually",
+    "rank": 9,
+    "pos": ["adverb"],
+    "definition_en": "in fact; really",
+    "example_en": "It looked difficult, but it was actually easy.",
+    "level": "A2"
+  },
+  {
+    "id": "add_v_0010",
+    "lemma": "add",
+    "rank": 10,
+    "pos": ["verb"],
+    "definition_en": "to put something together with something else",
+    "example_en": "Add a little salt to the soup.",
+    "level": "A1"
+  },
+  {
+    "id": "address_n_0011",
+    "lemma": "address",
+    "rank": 11,
+    "pos": ["noun", "verb"],
+    "definition_en": "details of where a person lives or works",
+    "example_en": "Please write your address clearly.",
+    "level": "A2"
+  },
+  {
+    "id": "adult_n_0012",
+    "lemma": "adult",
+    "rank": 12,
+    "pos": ["noun", "adjective"],
+    "definition_en": "a fully grown person",
+    "example_en": "The course is open to all adults.",
+    "level": "A2"
+  },
+  {
+    "id": "affect_v_0013",
+    "lemma": "affect",
+    "rank": 13,
+    "pos": ["verb"],
+    "definition_en": "to influence someone or something",
+    "example_en": "Weather can affect your mood.",
+    "level": "B1"
+  },
+  {
+    "id": "after_prep_0014",
+    "lemma": "after",
+    "rank": 14,
+    "pos": ["preposition", "conjunction", "adverb"],
+    "definition_en": "later than a time or event",
+    "example_en": "We met after class.",
+    "level": "A1"
+  },
+  {
+    "id": "again_adv_0015",
+    "lemma": "again",
+    "rank": 15,
+    "pos": ["adverb"],
+    "definition_en": "one more time",
+    "example_en": "Could you say that again, please?",
+    "level": "A1"
+  },
+  {
+    "id": "against_prep_0016",
+    "lemma": "against",
+    "rank": 16,
+    "pos": ["preposition"],
+    "definition_en": "in opposition to; touching a surface",
+    "example_en": "The bike was leaning against the wall.",
+    "level": "A2"
+  },
+  {
+    "id": "age_n_0017",
+    "lemma": "age",
+    "rank": 17,
+    "pos": ["noun", "verb"],
+    "definition_en": "the number of years someone has lived",
+    "example_en": "At the age of ten, she moved abroad.",
+    "level": "A1"
+  },
+  {
+    "id": "agency_n_0018",
+    "lemma": "agency",
+    "rank": 18,
+    "pos": ["noun"],
+    "definition_en": "a business or organization that provides a service",
+    "example_en": "He works for a travel agency.",
+    "level": "B1"
+  },
+  {
+    "id": "agent_n_0019",
+    "lemma": "agent",
+    "rank": 19,
+    "pos": ["noun"],
+    "definition_en": "a person who acts for or represents someone else",
+    "example_en": "Her agent negotiated the contract.",
+    "level": "B1"
+  },
+  {
+    "id": "ago_adv_0020",
+    "lemma": "ago",
+    "rank": 20,
+    "pos": ["adverb"],
+    "definition_en": "used to show how far in the past something happened",
+    "example_en": "We arrived two days ago.",
+    "level": "A1"
+  }
+]
