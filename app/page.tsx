@@ -1,10 +1,51 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+const HERO_TARGET_COUNT = 2800;
+const HERO_COUNT_DURATION_MS = 1400;
+
+function easeOutCubic(value: number): number {
+  return 1 - Math.pow(1 - value, 3);
+}
 
 export default function HomePage() {
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [heroCount, setHeroCount] = useState(0);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) {
+      setHeroCount(HERO_TARGET_COUNT);
+      return;
+    }
+
+    let frameId = 0;
+    const start = performance.now();
+
+    const tick = (now: number) => {
+      const elapsed = now - start;
+      const progress = Math.min(1, elapsed / HERO_COUNT_DURATION_MS);
+      const eased = easeOutCubic(progress);
+      setHeroCount(Math.round(HERO_TARGET_COUNT * eased));
+
+      if (progress < 1) {
+        frameId = window.requestAnimationFrame(tick);
+      }
+    };
+
+    frameId = window.requestAnimationFrame(tick);
+    return () => {
+      if (frameId) window.cancelAnimationFrame(frameId);
+    };
+  }, []);
+
+  const formattedHeroCount = useMemo(() => {
+    return new Intl.NumberFormat("en-US").format(heroCount);
+  }, [heroCount]);
 
   return (
     <main className="app-shell">
@@ -13,19 +54,22 @@ export default function HomePage() {
           <article className="paper-card hero-card">
             <div className="hero-content">
               <h1>
-                2,800 words is
+                {formattedHeroCount} words is
                 <br />
                 all we need.
               </h1>
-              <p className="hero-sub">たった2,800語で、日常英語の90%以上をカバーできる。</p>
+              <p className="hero-sub">英語の9割は、2,800語でできている。</p>
               <div className="hero-actions">
                 <Link href="/study" className="outline-button" aria-label="Start NGSL study">
                   START
                 </Link>
               </div>
               <div className="hero-links">
-                <Link href="/done" className="inline-link" aria-label="Open done words list">
-                  Done一覧
+                <Link href="/done" className="inline-link" aria-label="Open cleared words list">
+                  CLEARED
+                </Link>
+                <Link href="/keep" className="inline-link" aria-label="Open keep words list">
+                  KEEP
                 </Link>
                 <button
                   type="button"

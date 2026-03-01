@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { loadDoneMap } from "@/lib/progress-store";
-import { DoneMap, WordItem } from "@/lib/types";
+import { applyKeep, loadDoneMap, loadProgress, saveDoneMap, saveProgress, unmarkDone } from "@/lib/progress-store";
+import { DoneMap, LearnProgressMap, WordItem } from "@/lib/types";
 
 type DoneSort = "alpha" | "recent";
 
@@ -22,13 +22,15 @@ function byRecent(a: DoneWord, b: DoneWord): number {
   return byAlpha(a, b);
 }
 
-export function DoneListPage({ words }: { words: WordItem[] }) {
+export function ClearedListPage({ words }: { words: WordItem[] }) {
   const router = useRouter();
   const [sortMode, setSortMode] = useState<DoneSort>("alpha");
   const [doneMap, setDoneMap] = useState<DoneMap>({});
+  const [, setProgressMap] = useState<LearnProgressMap>({});
 
   useEffect(() => {
     setDoneMap(loadDoneMap());
+    setProgressMap(loadProgress());
   }, []);
 
   const doneWords = useMemo(() => {
@@ -42,12 +44,27 @@ export function DoneListPage({ words }: { words: WordItem[] }) {
     return list.sort(sortMode === "recent" ? byRecent : byAlpha);
   }, [doneMap, sortMode, words]);
 
+  function handleRestoreToKeep(wordId: string) {
+    setDoneMap((current) => {
+      const next = unmarkDone(current, wordId);
+      saveDoneMap(next);
+      return next;
+    });
+
+    setProgressMap((current) => {
+      if (current[wordId]) return current;
+      const { nextProgress } = applyKeep(current, wordId);
+      saveProgress(nextProgress);
+      return nextProgress;
+    });
+  }
+
   return (
-    <main className="done-shell">
-      <header className="done-header" aria-label="Done list header">
+    <main className="cleared-shell">
+      <header className="cleared-header" aria-label="Cleared list header">
         <button
           type="button"
-          className="done-back"
+          className="cleared-back"
           onClick={() => {
             if (typeof window !== "undefined" && window.history.length <= 1) {
               router.push("/");
@@ -59,35 +76,42 @@ export function DoneListPage({ words }: { words: WordItem[] }) {
         >
           <span aria-hidden="true">←</span> Back
         </button>
-        <h1>Done一覧</h1>
+        <h1>Cleared</h1>
       </header>
 
-      <section className="done-toolbar" aria-label="Done list controls">
+      <section className="cleared-toolbar" aria-label="Cleared list controls">
         <label htmlFor="done-sort">並び順</label>
         <select
           id="done-sort"
-          className="done-select"
+          className="cleared-select"
           value={sortMode}
           onChange={(event) => setSortMode(event.target.value as DoneSort)}
         >
           <option value="alpha">アルファベット順</option>
-          <option value="recent">最近Doneした順</option>
+          <option value="recent">最近Clearedした順</option>
         </select>
       </section>
 
-      <section className="done-list-wrap" aria-label="Done words">
+      <section className="cleared-list-wrap" aria-label="Cleared words">
         {doneWords.length === 0 ? (
-          <p className="done-empty">まだDoneした単語はありません。</p>
+          <p className="cleared-empty">まだClearedした単語はありません。</p>
         ) : (
-          <ul className="done-list">
+          <ul className="cleared-list">
             {doneWords.map((item) => (
-              <li key={item.word.id} className="done-item">
-                <p className="done-word">{item.word.lemma}</p>
-                <p className="done-row">
-                  <span className="done-label">品詞</span>
+              <li key={item.word.id} className="cleared-item">
+                <button
+                  type="button"
+                  className="cleared-restore-button"
+                  onClick={() => handleRestoreToKeep(item.word.id)}
+                >
+                  → to Keep
+                </button>
+                <p className="cleared-word">{item.word.lemma}</p>
+                <p className="cleared-row">
+                  <span className="cleared-label">品詞</span>
                   <span>{item.word.pos.join(" / ")}</span>
                 </p>
-                <p className="done-row done-definition">{item.word.definition_en}</p>
+                <p className="cleared-row cleared-definition">{item.word.definition_en}</p>
               </li>
             ))}
           </ul>

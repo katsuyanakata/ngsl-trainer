@@ -91,7 +91,7 @@ export function LearnPage({ words }: { words: WordItem[] }) {
         <section className="learn-stage" aria-label="Session complete">
           <article className="learn-placeholder-card">
             {progressStatus.total === 0
-              ? "すべての単語がDoneです。トップからDone一覧を確認できます。"
+              ? "すべての単語がClearedです。トップからClearedを確認できます。"
               : "このセッションは完了です。Undoで直前カードに戻せます。"}
           </article>
         </section>
@@ -122,7 +122,7 @@ export function LearnPage({ words }: { words: WordItem[] }) {
 
       {showSwipeHint ? (
         <p className="learn-once-hint" aria-live="polite">
-          Swipe left to keep  •  Swipe right to done
+          Swipe left to keep  •  Swipe right to clear
         </p>
       ) : null}
     </main>

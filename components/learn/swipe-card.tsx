@@ -180,8 +180,8 @@ export function SwipeCard({ onSwipeLeft, onSwipeRight, disabled = false, childre
     : `translate3d(${dx}px, 0, 0) rotate(${dx * 0.05}deg)`;
 
   const cueOpacity = Math.min(1, Math.abs(dx) / Math.max(threshold, 1));
-  const cueLabel = dx < 0 ? "KEEP" : dx > 0 ? "DONE" : "";
-  const cueToneClass = dx < 0 ? "is-keep" : dx > 0 ? "is-done" : "";
+  const cueLabel = dx < 0 ? "KEEP" : dx > 0 ? "CLEAR" : "";
+  const cueToneClass = dx < 0 ? "is-keep" : dx > 0 ? "is-clear" : "";
 
   return (
     <div className="swipe-card-wrap">

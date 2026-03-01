@@ -181,6 +181,12 @@ export function markDone(doneMap: DoneMap, wordId: string, now: Date = new Date(
   };
 }
 
+export function unmarkDone(doneMap: DoneMap, wordId: string): DoneMap {
+  const next = { ...doneMap };
+  delete next[wordId];
+  return next;
+}
+
 export function undoLastAction(progress: LearnProgressMap, action: UndoAction): LearnProgressMap {
   const next = { ...progress };
 
