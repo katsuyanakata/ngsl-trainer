@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { loadDoneMap, loadProgress } from "@/lib/progress-store";
+import { loadDoneMap, loadProgress, markDone, saveDoneMap } from "@/lib/progress-store";
 import { DoneMap, LearnProgressMap, WordItem } from "@/lib/types";
 
 type KeepSort = "alpha" | "recent";
@@ -50,6 +50,14 @@ export function KeepListPage({ words }: { words: WordItem[] }) {
     return list.sort(sortMode === "recent" ? byRecent : byAlpha);
   }, [doneMap, progressMap, sortMode, words]);
 
+  function handleMoveToCleared(wordId: string) {
+    setDoneMap((current) => {
+      const next = markDone(current, wordId);
+      saveDoneMap(next);
+      return next;
+    });
+  }
+
   return (
     <main className="keep-shell">
       <header className="keep-header" aria-label="Keep list header">
@@ -90,6 +98,13 @@ export function KeepListPage({ words }: { words: WordItem[] }) {
           <ul className="keep-list">
             {keepWords.map((item) => (
               <li key={item.word.id} className="keep-item">
+                <button
+                  type="button"
+                  className="keep-to-cleared-button"
+                  onClick={() => handleMoveToCleared(item.word.id)}
+                >
+                  → to Cleared
+                </button>
                 <p className="keep-word">{item.word.lemma}</p>
                 <p className="keep-row">
                   <span className="keep-label">品詞</span>

@@ -22,7 +22,6 @@ export function LearnPage({ words }: { words: WordItem[] }) {
   const {
     currentWord,
     isLoaded,
-    isFinished,
     reveal,
     toggleReveal,
     progressStatus,
@@ -79,21 +78,6 @@ export function LearnPage({ words }: { words: WordItem[] }) {
         <LearnHeader onBack={handleBack} progress={progressStatus} canUndo={canUndo} onUndo={undo} />
         <section className="learn-stage" aria-label="Preparing session">
           <article className="learn-placeholder-card">セッションを準備しています...</article>
-        </section>
-      </main>
-    );
-  }
-
-  if (isFinished) {
-    return (
-      <main className="learn-shell">
-        <LearnHeader onBack={handleBack} progress={progressStatus} canUndo={canUndo} onUndo={undo} />
-        <section className="learn-stage" aria-label="Session complete">
-          <article className="learn-placeholder-card">
-            {progressStatus.total === 0
-              ? "すべての単語がClearedです。トップからClearedを確認できます。"
-              : "このセッションは完了です。Undoで直前カードに戻せます。"}
-          </article>
         </section>
       </main>
     );

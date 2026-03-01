@@ -8,14 +8,13 @@ type LearnHeaderProps = {
   onUndo: () => void;
 };
 
-function buildDots(done: number, total: number): boolean[] {
-  const dotCount = total > 0 ? Math.min(5, total) : 5;
-  const filled = total > 0 ? Math.round((done / total) * dotCount) : 0;
-  return Array.from({ length: dotCount }, (_, index) => index < filled);
+function toRatio(done: number, total: number): number {
+  if (total <= 0) return 0;
+  return Math.max(0, Math.min(1, done / total));
 }
 
 export function LearnHeader({ onBack, progress, canUndo, onUndo }: LearnHeaderProps) {
-  const dots = buildDots(progress.done, progress.total);
+  const ratio = toRatio(progress.done, progress.total);
 
   return (
     <header className="learn-header" aria-label="Learn session controls">
@@ -23,10 +22,20 @@ export function LearnHeader({ onBack, progress, canUndo, onUndo }: LearnHeaderPr
         <span aria-hidden="true">←</span> Back
       </button>
 
-      <div className="learn-progress-dots" aria-label={`${progress.done} of ${progress.total} completed`}>
-        {dots.map((isActive, index) => (
-          <span key={index} className={`learn-dot${isActive ? " is-active" : ""}`} />
-        ))}
+      <div
+        className="learn-progress-track"
+        role="progressbar"
+        aria-label={`${progress.done} of ${progress.total} cleared`}
+        aria-valuemin={0}
+        aria-valuemax={progress.total}
+        aria-valuenow={progress.done}
+      >
+        <span className="learn-progress-bar">
+          <span className="learn-progress-fill" style={{ transform: `scaleX(${ratio})` }} />
+        </span>
+        <span className="learn-progress-count" aria-hidden="true">
+          {progress.done}/{progress.total}
+        </span>
       </div>
 
       <button

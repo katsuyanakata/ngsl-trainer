@@ -3,11 +3,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   applyKeep,
-  buildSessionQueue,
   loadDoneMap,
   loadProgress,
   markDone,
   restoreDoneState,
+  unmarkDone,
   saveDoneMap,
   saveProgress,
   UndoAction,
@@ -18,8 +18,7 @@ import { DoneMap, LearnProgressMap, RevealState, WordItem } from "@/lib/types";
 export function useStudySession(words: WordItem[]) {
   const [progress, setProgress] = useState<LearnProgressMap>({});
   const [doneMap, setDoneMap] = useState<DoneMap>({});
-  const [queue, setQueue] = useState<string[]>([]);
-  const [queueIndex, setQueueIndex] = useState(0);
+  const [currentWordId, setCurrentWordId] = useState<string | null>(null);
   const [reveal, setReveal] = useState<RevealState>(0);
   const [lastAction, setLastAction] = useState<UndoAction | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -28,12 +27,24 @@ export function useStudySession(words: WordItem[]) {
   const doneMapRef = useRef<DoneMap>({});
 
   const wordsById = useMemo(() => new Map(words.map((word) => [word.id, word])), [words]);
-  const currentWordId = queue[queueIndex];
+  const wordIds = useMemo(() => words.map((word) => word.id), [words]);
   const currentWord = currentWordId ? wordsById.get(currentWordId) : undefined;
 
-  const total = queue.length;
-  const done = Math.min(queueIndex, total);
-  const isFinished = isLoaded && queueIndex >= total;
+  const pickRandomWordId = useCallback((): string | null => {
+    if (!wordIds.length) return null;
+    const randomIndex = Math.floor(Math.random() * wordIds.length);
+    return wordIds[randomIndex] ?? null;
+  }, [wordIds]);
+
+  const total = words.length;
+  const done = useMemo(() => {
+    if (!words.length) return 0;
+    let doneCount = 0;
+    for (const word of words) {
+      if (doneMap[word.id]) doneCount += 1;
+    }
+    return doneCount;
+  }, [doneMap, words]);
 
   useEffect(() => {
     const loadedProgress = loadProgress();
@@ -44,14 +55,16 @@ export function useStudySession(words: WordItem[]) {
 
     setProgress(loadedProgress);
     setDoneMap(loadedDoneMap);
-
-    const initialQueue = buildSessionQueue(words, loadedProgress, loadedDoneMap);
-    setQueue(initialQueue);
-    setQueueIndex(0);
+    setCurrentWordId(wordIds.length ? wordIds[Math.floor(Math.random() * wordIds.length)] : null);
     setReveal(0);
     setLastAction(null);
     setIsLoaded(true);
-  }, [words]);
+  }, [wordIds]);
+
+  useEffect(() => {
+    if (!isLoaded || currentWordId || !wordIds.length) return;
+    setCurrentWordId(pickRandomWordId());
+  }, [currentWordId, isLoaded, pickRandomWordId, wordIds.length]);
 
   useEffect(() => {
     setReveal(0);
@@ -63,7 +76,7 @@ export function useStudySession(words: WordItem[]) {
 
   const rateCurrent = useCallback(
     (actionType: "keep" | "done") => {
-      if (!currentWordId || queueIndex >= total) return;
+      if (!currentWordId) return;
 
       const prevProgress = progressRef.current[currentWordId] ?? null;
       const prevDoneAt = doneMapRef.current[currentWordId] ?? null;
@@ -73,6 +86,11 @@ export function useStudySession(words: WordItem[]) {
         progressRef.current = nextProgress;
         setProgress(nextProgress);
         saveProgress(nextProgress);
+
+        const nextDoneMap = unmarkDone(doneMapRef.current, currentWordId);
+        doneMapRef.current = nextDoneMap;
+        setDoneMap(nextDoneMap);
+        saveDoneMap(nextDoneMap);
       } else {
         const nextDoneMap = markDone(doneMapRef.current, currentWordId);
         doneMapRef.current = nextDoneMap;
@@ -84,14 +102,13 @@ export function useStudySession(words: WordItem[]) {
         wordId: currentWordId,
         prevProgress,
         prevDoneAt,
-        prevQueueIndex: queueIndex,
         actionType
       });
 
-      setQueueIndex((index) => Math.min(index + 1, total));
+      setCurrentWordId(pickRandomWordId());
       setReveal(0);
     },
-    [currentWordId, queueIndex, total]
+    [currentWordId, pickRandomWordId]
   );
 
   const undo = useCallback(() => {
@@ -104,14 +121,12 @@ export function useStudySession(words: WordItem[]) {
       saveProgress(restoredProgress);
     }
 
-    if (lastAction.actionType === "done") {
-      const restoredDoneMap = restoreDoneState(doneMapRef.current, lastAction);
-      doneMapRef.current = restoredDoneMap;
-      setDoneMap(restoredDoneMap);
-      saveDoneMap(restoredDoneMap);
-    }
+    const restoredDoneMap = restoreDoneState(doneMapRef.current, lastAction);
+    doneMapRef.current = restoredDoneMap;
+    setDoneMap(restoredDoneMap);
+    saveDoneMap(restoredDoneMap);
 
-    setQueueIndex(lastAction.prevQueueIndex);
+    setCurrentWordId(lastAction.wordId);
     setReveal(0);
     setLastAction(null);
   }, [lastAction]);
@@ -127,7 +142,6 @@ export function useStudySession(words: WordItem[]) {
   return {
     currentWord,
     isLoaded,
-    isFinished,
     reveal,
     toggleReveal,
     progress,

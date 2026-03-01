@@ -1,4 +1,4 @@
-import { DoneMap, LearnProgressEntry, LearnProgressMap, WordItem } from "@/lib/types";
+import { DoneMap, LearnProgressEntry, LearnProgressMap } from "@/lib/types";
 
 export const LEARN_STORAGE_KEY = "ngsl_learn_progress_v1";
 export const DONE_STORAGE_KEY = "ngsl_done_words_v1";
@@ -9,7 +9,6 @@ export type UndoAction = {
   wordId: string;
   prevProgress: LearnProgressEntry | null;
   prevDoneAt: string | null;
-  prevQueueIndex: number;
   actionType: "keep" | "done";
 };
 
@@ -60,15 +59,6 @@ function coerceEntry(value: unknown): LearnProgressEntry | null {
     lastReviewedAt,
     nextDueAt
   };
-}
-
-function shuffleIds(ids: string[]): string[] {
-  const copy = ids.slice();
-  for (let i = copy.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [copy[i], copy[j]] = [copy[j], copy[i]];
-  }
-  return copy;
 }
 
 function toDoneMap(rawValue: unknown): DoneMap {
@@ -209,52 +199,4 @@ export function restoreDoneState(doneMap: DoneMap, action: UndoAction): DoneMap 
 
   next[action.wordId] = action.prevDoneAt;
   return next;
-}
-
-export function buildSessionQueue(
-  words: WordItem[],
-  progress: LearnProgressMap,
-  doneMap: DoneMap,
-  now: Date = new Date()
-): string[] {
-  if (!words.length) return [];
-
-  const dueWords: Array<{ wordId: string; dueAt: number }> = [];
-  const unseenIds: string[] = [];
-
-  for (const word of words) {
-    if (doneMap[word.id]) continue;
-
-    const entry = progress[word.id];
-    if (!entry) {
-      unseenIds.push(word.id);
-      continue;
-    }
-
-    const dueAt = toDate(entry.nextDueAt);
-    if (!dueAt || dueAt <= now) {
-      dueWords.push({
-        wordId: word.id,
-        dueAt: dueAt?.getTime() ?? Number.NEGATIVE_INFINITY
-      });
-    }
-  }
-
-  const dueIds = dueWords.sort((a, b) => a.dueAt - b.dueAt).map((item) => item.wordId);
-  const randomUnseen = shuffleIds(unseenIds);
-  const queue = [...dueIds, ...randomUnseen];
-
-  if (queue.length) return queue;
-
-  const nonDoneWords = words.filter((word) => !doneMap[word.id]);
-  if (!nonDoneWords.length) return [];
-
-  const fallback = nonDoneWords
-    .map((word) => ({
-      wordId: word.id,
-      nextDueAt: toDate(progress[word.id]?.nextDueAt)?.getTime() ?? Number.POSITIVE_INFINITY
-    }))
-    .sort((a, b) => a.nextDueAt - b.nextDueAt)[0];
-
-  return fallback ? [fallback.wordId] : [nonDoneWords[Math.floor(Math.random() * nonDoneWords.length)].id];
 }
