@@ -1,7 +1,5 @@
-import { ClearedListPage } from "@/components/cleared/cleared-list-page";
-import { getWords } from "@/lib/ngsl";
+import { redirect } from "next/navigation";
 
 export default function DonePage() {
-  const words = getWords();
-  return <ClearedListPage words={words} />;
+  redirect("/cleared");
 }

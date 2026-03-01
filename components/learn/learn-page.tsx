@@ -88,7 +88,11 @@ export function LearnPage({ words }: { words: WordItem[] }) {
       <main className="learn-shell">
         <LearnHeader onBack={handleBack} progress={progressStatus} canUndo={canUndo} onUndo={undo} />
         <section className="learn-stage" aria-label="No current card">
-          <article className="learn-placeholder-card">表示可能なカードがありません。</article>
+          <article className="learn-placeholder-card">
+            {progressStatus.total > 0 && progressStatus.done >= progressStatus.total
+              ? "すべてClearedです。トップからClearedを確認できます。"
+              : "表示可能なカードがありません。"}
+          </article>
         </section>
       </main>
     );

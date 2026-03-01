@@ -106,10 +106,6 @@ export function KeepListPage({ words }: { words: WordItem[] }) {
                   → to Cleared
                 </button>
                 <p className="keep-word">{item.word.lemma}</p>
-                <p className="keep-row">
-                  <span className="keep-label">品詞</span>
-                  <span>{item.word.pos.join(" / ")}</span>
-                </p>
                 <p className="keep-row keep-definition">{item.word.definition_en}</p>
               </li>
             ))}

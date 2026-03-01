@@ -2,7 +2,6 @@ export type WordItem = {
   id: string;
   lemma: string;
   rank: number;
-  pos: string[];
   definition_en: string;
   example_en: string;
   level?: string;
@@ -22,4 +21,4 @@ export type LearnProgressMap = Record<string, LearnProgressEntry>;
 
 export type DoneMap = Record<string, string>;
 
-export type RevealState = 0 | 1 | 2 | 3;
+export type RevealState = 0 | 1 | 2;

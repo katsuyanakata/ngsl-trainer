@@ -65,7 +65,7 @@ export default function HomePage() {
                 </Link>
               </div>
               <div className="hero-links">
-                <Link href="/done" className="inline-link" aria-label="Open cleared words list">
+                <Link href="/cleared" className="inline-link" aria-label="Open cleared words list">
                   CLEARED
                 </Link>
                 <Link href="/keep" className="inline-link" aria-label="Open keep words list">

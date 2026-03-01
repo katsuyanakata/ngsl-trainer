@@ -9,12 +9,12 @@ type WordCardContentProps = {
 };
 
 export function WordCardContent({ word, reveal, onToggleReveal, disabled = false }: WordCardContentProps) {
-  const canReveal = !disabled && reveal < 3;
+  const canReveal = !disabled && reveal < 2;
   const [showSwipeNudge, setShowSwipeNudge] = useState(false);
   const nudgeTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (reveal >= 3) return;
+    if (reveal >= 2) return;
     setShowSwipeNudge(false);
   }, [reveal]);
 
@@ -49,7 +49,7 @@ export function WordCardContent({ word, reveal, onToggleReveal, disabled = false
           return;
         }
 
-        if (reveal >= 3) {
+        if (reveal >= 2) {
           triggerSwipeNudge();
         }
       }}
@@ -62,7 +62,7 @@ export function WordCardContent({ word, reveal, onToggleReveal, disabled = false
           return;
         }
 
-        if (reveal >= 3) {
+        if (reveal >= 2) {
           triggerSwipeNudge();
         }
       }}
@@ -74,19 +74,12 @@ export function WordCardContent({ word, reveal, onToggleReveal, disabled = false
       <div className="word-card-reveal" aria-live="polite">
         {reveal >= 1 ? (
           <>
-            <p className="word-card-label">品詞</p>
-            <p className="word-card-pos">{word.pos.join(" / ")}</p>
-          </>
-        ) : null}
-
-        {reveal >= 2 ? (
-          <>
             <p className="word-card-label">意味</p>
             <p className="word-card-definition">{word.definition_en}</p>
           </>
         ) : null}
 
-        {reveal >= 3 ? (
+        {reveal >= 2 ? (
           <>
             <p className="word-card-label">例文</p>
             <p className="word-card-example">{word.example_en}</p>

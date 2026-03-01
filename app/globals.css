@@ -389,7 +389,6 @@ button {
   gap: 8px;
 }
 
-.word-card-pos,
 .word-card-definition,
 .word-card-example {
   margin: 0;
@@ -406,12 +405,6 @@ button {
   color: var(--muted);
   font-size: 0.76rem;
   letter-spacing: 0.08em;
-}
-
-.word-card-pos {
-  font-size: 0.76rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .word-card-definition,
@@ -572,13 +565,6 @@ button {
   gap: 8px;
   font-size: 0.94rem;
   line-height: 1.5;
-}
-
-.cleared-label,
-.keep-label {
-  color: var(--muted);
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
 }
 
 .cleared-definition,

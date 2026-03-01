@@ -107,10 +107,6 @@ export function ClearedListPage({ words }: { words: WordItem[] }) {
                   → to Keep
                 </button>
                 <p className="cleared-word">{item.word.lemma}</p>
-                <p className="cleared-row">
-                  <span className="cleared-label">品詞</span>
-                  <span>{item.word.pos.join(" / ")}</span>
-                </p>
                 <p className="cleared-row cleared-definition">{item.word.definition_en}</p>
               </li>
             ))}
