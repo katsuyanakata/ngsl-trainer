@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "@/app/globals.css";
 
 export const metadata: Metadata = {
-  title: "NGSL 2800 Trainer",
+  title: "NGSL Trainer",
   description: "Learn core NGSL vocabulary with a simple, focused workflow."
 };
 
